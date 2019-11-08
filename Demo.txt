@@ -1,0 +1,225 @@
+Option Explicit
+Dim curElement As MSHTML.IHTMLElement
+Dim WithEvents html As HTMLDocument
+Dim objName As Variant
+Dim rowNum As Variant
+Dim otrhtml As String
+Dim htmlbuff() As String
+Dim i As Integer
+Dim j As Integer
+Dim arrCnt As Integer
+Dim arrTempCnt As Integer
+Dim temp As String
+
+Dim intPos As Integer
+Dim intPos1 As Integer
+Dim intPosTitle As Integer
+Dim intPosValue As Integer
+Dim xPath As String
+Dim absxPath As String
+Dim name As String
+Dim value As String
+Dim shref As String
+Dim title As String
+Dim strtype As String
+Dim temp1 As String
+Dim teststra As String
+Dim tagName As String
+
+Private Sub CommandButton1_Click()
+WebBrowser1.Navigate (txtURL.Text)
+
+End Sub
+
+Private Sub WebBrowser1_DocumentComplete(ByVal pDisp As Object, URL As Variant)
+On Error Resume Next
+Set html = WebBrowser1.Document
+End Sub
+
+Private Sub html_onmouseover()
+
+Set curElement = WebBrowser1.Document.parentWindow.event.srcElement
+TextBox1.Text = curElement.ID
+TextBox2.Text = curElement.tagName
+TextBox3.Text = curElement.className
+TextBox4.Text = curElement.innerText
+TextBox5.Text = curElement.outerHTML
+
+otrhtml = curElement.outerHTML
+name = retName(otrhtml)
+       
+shref = retHref(otrhtml)
+        
+value = retVal(otrhtml)
+title = curElement.title
+strtype = retType(otrhtml)
+
+TextBox6.value = name
+TextBox7.value = shref
+TextBox8.value = value
+TextBox9.Text = curElement.title
+TextBox10.value = strtype
+
+End Sub
+
+
+Private Function html_oncontextmenu() As Boolean
+MsgBox title
+
+rowNum = 2
+objName = InputBox("Enter the name of object")
+Sheets(1).Cells(rowNum, 1).value = objName
+Sheets(1).Cells(rowNum, 2).value = TextBox1.Text
+Sheets(1).Cells(rowNum, 5).value = TextBox2.Text
+Sheets(1).Cells(rowNum, 8).value = getRelXpath()
+
+Sheets(1).Cells(rowNum, 7).value = Replace(Sheets(1).Cells(rowNum, 8).value, "//", "")
+Sheets(1).Cells(rowNum, 7).value = Replace(Sheets(1).Cells(rowNum, 7).value, "@", "")
+
+
+End Function
+
+
+Function retName(otrhtml As String) As String
+
+Dim arrCnt As Integer
+Dim arrCnt1 As Integer
+Dim arrOutrHtml() As String
+Dim arrtemp() As String
+Dim strname As String
+Dim a As Integer
+
+        intPos = InStr(otrhtml, "name=")
+        If (intPos > 0) Then
+        
+        
+            arrOutrHtml = Split(otrhtml, "name=")
+            arrCnt = UBound(arrOutrHtml)
+                    temp = arrOutrHtml(1)
+                    arrtemp = Split(temp, Chr(34))
+                    arrCnt1 = UBound(arrtemp)
+                    strname = arrtemp(1)
+                       
+        End If
+        
+        retName = strname
+        
+End Function
+
+Function retHref(otrhtml As String) As String
+
+Dim arrCnt As Integer
+Dim arrCnt1 As Integer
+Dim arrOutrHtml() As String
+Dim arrtemp() As String
+Dim strname As String
+Dim a As Integer
+
+
+         intPos = InStr(otrhtml, "href=")
+        If (intPos > 0) Then
+        
+        
+            arrOutrHtml = Split(otrhtml, "href=")
+            arrCnt = UBound(arrOutrHtml)
+                    temp = arrOutrHtml(1)
+                    arrtemp = Split(temp, Chr(34))
+                    arrCnt1 = UBound(arrtemp)
+                    strname = arrtemp(1)
+                       
+        End If
+        
+        retHref = strname
+        
+End Function
+
+Function retVal(otrhtml As String) As String
+
+Dim arrCnt As Integer
+Dim arrCnt1 As Integer
+Dim arrOutrHtml() As String
+Dim arrtemp() As String
+Dim strname As String
+Dim a As Integer
+
+
+         intPos = InStr(otrhtml, "value=")
+        If (intPos > 0) Then
+        
+        
+            arrOutrHtml = Split(otrhtml, "value=")
+            arrCnt = UBound(arrOutrHtml)
+                    temp = arrOutrHtml(1)
+                    arrtemp = Split(temp, Chr(34))
+                    arrCnt1 = UBound(arrtemp)
+                    strname = arrtemp(1)
+                       
+        End If
+        
+        retVal = strname
+        
+End Function
+
+Function retType(otrhtml As String) As String
+
+Dim arrCnt As Integer
+Dim arrCnt1 As Integer
+Dim arrOutrHtml() As String
+Dim arrtemp() As String
+Dim strname As String
+Dim a As Integer
+
+
+         intPos = InStr(otrhtml, "type=")
+         
+         If (intPos > 0) Then
+            arrOutrHtml = Split(otrhtml, "type=")
+            arrCnt = UBound(arrOutrHtml)
+            temp = arrOutrHtml(1)
+            arrtemp = Split(temp, Chr(34))
+            arrCnt1 = UBound(arrtemp)
+            strname = arrtemp(1)
+        End If
+        
+        retType = strname
+        
+End Function
+
+Function getRelXpath() As String
+
+If TextBox1.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@id='" & TextBox1.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox6.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@name='" & TextBox6.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox7.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@href='" & TextBox7.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox3.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@class='" & TextBox3.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox4.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[text()=''" & TextBox4.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox8.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@value='" & TextBox8.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox9.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@title='" & TextBox9.Text & "']"
+getRelXpath = xPath
+Exit Function
+ElseIf TextBox10.Text <> "" Then
+xPath = "//" & TextBox2.Text & "[@type='" & TextBox10.Text & "']"
+getRelXpath = xPath
+Exit Function
+End If
+        
+End Function
+
